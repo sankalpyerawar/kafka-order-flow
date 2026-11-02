@@ -1,0 +1,40 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orders
+    username: orders
+    password: orders
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none # schema is owned by Flyway
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      properties:
+        enable.idempotence: true
+        linger.ms: 5
+    consumer:
+      group-id: order-service
+      auto-offset-reset: earliest
+      properties:
+        isolation.level: read_committed
+    listener:
+      concurrency: 3 # one thread per partition
+
+outbox:
+  relay:
+    enabled: true
+    batch-size: 100
+    poll-interval-ms: 500
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
